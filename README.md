@@ -1,7 +1,7 @@
  ## Author
 - [Ksila Ons](https://github.com/onsksila)
 # CHICKEN-RUN-API
-
+This API was built using NodeJS, ExpressJS and MongoDB Atlas Database. <br/>
 This API includes CRUD for chicken and farmyard objects.
 A farmyard contains a list of chickens, a chicken can be added to only one farmyard.
 You can also increase the chicken's steps.
