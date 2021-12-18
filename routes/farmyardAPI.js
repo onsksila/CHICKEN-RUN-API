@@ -49,25 +49,25 @@ router.post(
 
 
 //Add a chicken by _id to a specific farmyard : PATCH http://localhost:8001/farmyard/FARMYARD_id/CHICKEN_id
-router.patch('/:idFarmyard/:idChicken', async (req, res)=>{
+router.patch('/:idFarmyard/:idChicken', async (req, res) => {
     try {
-        if(!ObjectId.isValid(req.params.idChicken)&& !ObjectId.isValid(req.params.idFarmyard) )
-        return res.status(400).send('Unknown IDS: Unknown FarmyarID' + req.params.idFarmyard + ', Unknown Chicken ID '+ req.params.idChicken )
+      const Farmyards = await farmyard.find().populate('listOfChickens');
+      if (await checkExists(Farmyards, req.params.idChicken)) {
+        res.send('Chicken already exists in a farm');
+      } else {
         const chickenToAdd = await Chicken.findById(req.params.idChicken);
         const farmyard = await Farmyard.findByIdAndUpdate(
-            req.params.idFarmyard,
-            {$push :  {listOfChickens :chickenToAdd}},
-            {new: true}
-         );
-         res.status(200).send(farmyard);
-    
-
+          req.params.idFarmyard,
+          { $push: { listOfChickens: chickenToAdd } },
+          { new: true }
+        );
+        res.status(200).send(farmyard);
+      }
     } catch (error) {
-        console.error(error.message);
-        res.status(500).send('Server error');
+      console.error(error.message);
+      res.status(500).send('Server error');
     }
-}
-)
+  });
 
 
 //Delete a farmyard by _id : DELETE http://localhost:8001/farmyard/FARMYARD_id
@@ -83,6 +83,21 @@ router.delete('/:id', async (req, res)=>{
         res.status(500).send('Server error');
     }
 })
+
+
+// function to verify if a chicken exists in a farmyard 
+
+async function checkExists(farmsList, chickenId) {
+    const chickenToAdd = await Chicken.findById(chickenId);
+    for (farm of farmsList) {
+      for (ch of farm.listOfChickens) {
+        if (ch._id.toString() === chickenToAdd._id.toString()) {
+          return true;
+        }
+      }
+    }
+    return false;
+  } 
 
 module.exports = router;
 
