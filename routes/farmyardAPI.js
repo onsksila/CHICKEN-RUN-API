@@ -6,10 +6,10 @@ const { check, validationResult } = require('express-validator/check');
 const ObjectId = require('mongoose').Types.ObjectId;
 const farmyard = require('../models/farmyard');
 
-// Get farmyards
+// Get Farmyards : GET http://localhost:8001/farmyard
 router.get('/', async (req, res)=>{
     try {
-        const Farmyards = await farmyard.find().populate("listOfChickens");
+        const Farmyards = await farmyard.find().populate({ path: "listOfChickens", select: 'name'});
         res.status(200).send(Farmyards);
     } catch (err) {
         console.error(err.message);
@@ -19,7 +19,7 @@ router.get('/', async (req, res)=>{
 });
 
 
-// Add chicken to a farmyard
+// Add a farmyard : POST http://localhost:8001/farmyard/
 router.post(
     '/', 
     [
@@ -48,17 +48,20 @@ router.post(
 } );
 
 
-//Add chicken to a specific farmyard
+//Add a chicken by _id to a specific farmyard : PATCH http://localhost:8001/farmyard/FARMYARD_id/CHICKEN_id
 router.patch('/:idFarmyard/:idChicken', async (req, res)=>{
     try {
         if(!ObjectId.isValid(req.params.idChicken)&& !ObjectId.isValid(req.params.idFarmyard) )
         return res.status(400).send('Unknown IDS: Unknown FarmyarID' + req.params.idFarmyard + ', Unknown Chicken ID '+ req.params.idChicken )
+        const chickenToAdd = await Chicken.findById(req.params.idChicken);
+        const farmyard = await Farmyard.findByIdAndUpdate(
+            req.params.idFarmyard,
+            {$push :  {listOfChickens :chickenToAdd}},
+            {new: true}
+         );
+         res.status(200).send(farmyard);
+    
 
-
-        const Farmyards = await farmyard.find().populate("listOfChickens");
-        let exists = Object.values(Farmyards).includes(Farmyards.listOfChickens);
-
-            console.log( exists.valueOf())
     } catch (error) {
         console.error(error.message);
         res.status(500).send('Server error');
@@ -67,14 +70,19 @@ router.patch('/:idFarmyard/:idChicken', async (req, res)=>{
 )
 
 
-/*
-const chickenToAdd = await Chicken.findById(req.params.idChicken);
-       const farmyard = await Farmyard.findByIdAndUpdate(
-           req.params.idFarmyard,
-           {$push :  {listOfChickens :chickenToAdd}},
-           {new: true}
-        );
-        res.status(200).send(farmyard); 
-*/
+//Delete a farmyard by _id : DELETE http://localhost:8001/farmyard/FARMYARD_id
+router.delete('/:id', async (req, res)=>{
+    try {
+        if(!ObjectId.isValid(req.params.id))
+        return res.status(400).send('ID unknown: ' + req.params.id)
+        await Farmyard.findByIdAndRemove(req.params.id);
+        res.status(200).send('Farmyard deleted'); 
+
+    } catch (error) {
+        console.error(err.message);
+        res.status(500).send('Server error');
+    }
+})
+
 module.exports = router;
 

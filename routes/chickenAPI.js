@@ -6,7 +6,7 @@ const ObjectId = require('mongoose').Types.ObjectId;
 
 
 
-// Get chickens
+// Get the list of chickens :  GET http://localhost:8001/chicken
 router.get('/', async (req, res)=>{
     try {
         const chickens = await Chicken.find();
@@ -19,7 +19,7 @@ router.get('/', async (req, res)=>{
 });
 
 
-// Add chicken
+// Add a chicken to the list of chickens : POST http://localhost:8001/chicken/ + body { "name" : "...", "birthday": "mm-dd-yyyy", "weight": ... }
 router.post(
     '/', 
     [
@@ -49,7 +49,7 @@ router.post(
 } );
 
 
-// Update chicken with put
+// Update a chicken by _id with put : PUT http://localhost:8001/chicken/CHICKEN_id  + body {changes...}
 router.put('/:id', async (req, res)=>{
         try {
             if(!ObjectId.isValid(req.params.id))
@@ -76,7 +76,7 @@ router.put('/:id', async (req, res)=>{
     }
 )
 
-// Update chicken with PATCH
+// Update a chicken by _id with patch : PATCH  http://localhost:8001/chicken/CHICKEN_id  + body {changes...}
 router.patch('/:id', async (req, res)=>{
     try {
         if(!ObjectId.isValid(req.params.id))
@@ -96,7 +96,7 @@ router.patch('/:id', async (req, res)=>{
 }
 )
 
-// Delete chicken
+// Delete a chicken by _id : DELETE http://localhost:8001/chicken/CHICKEN_id 
 router.delete('/:id', async (req, res)=>{
     try {
         if(!ObjectId.isValid(req.params.id))
@@ -110,7 +110,7 @@ router.delete('/:id', async (req, res)=>{
     }
 })
 
-//step +1
+// Increase chicken's steps by 1 by its _id :  GET  http://localhost:8001/chicken/run/CHICKEN_id 
 router.get('/run/:id', async (req, res)=>{
     try {
         if(!ObjectId.isValid(req.params.id))
